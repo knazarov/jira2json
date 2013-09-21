@@ -8,6 +8,7 @@ import ConfigParser
 import getpass
 import errno
 import json
+import datetime
 
 import exceptions
 
@@ -105,7 +106,7 @@ def execute_query(session, url, query, start_at, max_results=10):
     return get_json(session, url, 'search', search_params)['issues']
     
 
-def search_issues(session, url, query = '', days = None):
+def search_issues(session, url, query = ''):
     start_at = 0
 
     full_query = query
@@ -124,10 +125,30 @@ def search_issues(session, url, query = '', days = None):
 def get_issue(session, url, key):
     return get_json(session, url, 'issue/%s' % key, {})
 
+def compose_query(base_query, days = None):
+    since_expr = ''
+
+    if days:
+        since_date = datetime.datetime.now() - \
+            datetime.timedelta(days = days)
+        strtime = '"' + since_date.strftime('%Y/%m/%d %H:%M') + '"'
+        since_expr = '( updatedDate > ' + strtime + ' or createdDate > ' + strtime + ')'
+
+    query = '(' + base_query + ')'
+
+
+    if base_query and since_expr:
+        query += ' and '
+
+    if since_expr:
+        query += since_expr
+
+    return query
+
 def main():
     parser = argparse.ArgumentParser()
 
-    #parser.add_argument('--days', '-d', type=int)
+    parser.add_argument('--days', '-d', type=int)
     parser.add_argument('--query', '-q')
     parser.add_argument('--username', '-u')
     parser.add_argument('--password', '-p')
@@ -145,13 +166,15 @@ def main():
     if not args.username:
         username,password = get_credentials(url)
  
+    query = compose_query(args.query, args.days)
+
     session = establish_http_session(username,
                                      password,
                                      args.no_verify)
 
     first_entry = True
     print '['
-    for issue in search_issues(session, url, args.query, args.days):
+    for issue in search_issues(session, url, query):
         if not first_entry:
             print ','
 
