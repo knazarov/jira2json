@@ -13,7 +13,7 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'jira2json = jira2json:main',
+            'jira2json = jira2json:_main',
         ],
     },
 )
