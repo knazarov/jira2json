@@ -11,4 +11,9 @@ setup(
     author = "Konstantin Nazarov",
     author_email = "mail@kn.am",
     license='MIT',
+    entry_points={
+        'console_scripts': [
+            'jira2json = jira2json:main',
+        ],
+    },
 )
