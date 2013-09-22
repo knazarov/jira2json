@@ -134,8 +134,10 @@ def compose_query(base_query, days = None):
         strtime = '"' + since_date.strftime('%Y/%m/%d %H:%M') + '"'
         since_expr = '( updatedDate > ' + strtime + ' or createdDate > ' + strtime + ')'
 
-    query = '(' + base_query + ')'
+    query = ''
 
+    if base_query:
+        query += '(' + base_query + ')'
 
     if base_query and since_expr:
         query += ' and '
